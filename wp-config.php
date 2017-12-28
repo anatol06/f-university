@@ -18,7 +18,8 @@
  * @package WordPress
  */
 // ** MySQL settings - You can get this info from your web host ** //
-$url = parse_url(getenv('DATABASE_URL') ? getenv('DATABASE_URL') : getenv('CLEARDB_DATABASE_URL'));
+//$url = parse_url(getenv('DATABASE_URL') ? getenv('DATABASE_URL') : getenv('CLEARDB_DATABASE_URL'));
+
 
 if (file_exists(dirname(__FILE__) . '/local.php')) {
 	// Local DB settings
@@ -30,10 +31,17 @@ if (file_exists(dirname(__FILE__) . '/local.php')) {
 
 } else {
 	// Live DB settings	
-	define('DB_NAME', 		trim($url['path'], '/'));
+
+	/* define('DB_NAME', 		trim($url['path'], '/'));
 	define('DB_USER', 		$url['user']);
 	define('DB_PASSWORD', $url['pass']);
 	define('DB_HOST', 		$url['host']);
+	define('DB_CHARSET', 'utf8'); */
+
+	define('DB_NAME', 		getenv('DB_NAME'));
+	define('DB_USER', 		getenv('DB_USER'));
+	define('DB_PASSWORD', getenv('DB_PASSWORD'));
+	define('DB_HOST', 		getenv('DB_HOST'));
 	define('DB_CHARSET', 'utf8');
 
 	define('AUTH_KEY',         getenv('AUTH_KEY'));
