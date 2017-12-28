@@ -1,5 +1,4 @@
 local.php
-vendor/
 
 # Numerous always-ignore extensions
 *.diff
@@ -13,6 +12,7 @@ vendor/
 *~
 *.sass-cache
 node_modules/
+/vendor/
 .tmp/
 
 # OS or Editor folders
@@ -26,7 +26,6 @@ Thumbs.db
 nbproject
 *.sublime-project
 *.sublime-workspace
-*.komodoproject
-.komodotools
+*.komodoprojectkomodotools
 _notes
 dwsync.xml
