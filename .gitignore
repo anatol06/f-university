@@ -1,4 +1,5 @@
 local.php
+vendor/
 
 # Numerous always-ignore extensions
 *.diff
