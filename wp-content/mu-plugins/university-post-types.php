@@ -35,7 +35,7 @@
 
     // Professor Post Type
     register_post_type('professor', array(
-      'supports' => array('title', 'editor'),
+      'supports' => array('title', 'editor', 'thumbnail'),
       'public' => true,
       'menu_icon' => 'dashicons-welcome-learn-more',
       'labels' => array(
@@ -51,4 +51,3 @@
   add_action('init', 'university_post_types');
 
   ?>
-
