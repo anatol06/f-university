@@ -10340,6 +10340,8 @@ var _HeroSlider = _interopRequireDefault(__webpack_require__(4));
 
 var _GoogleMap = _interopRequireDefault(__webpack_require__(5));
 
+var _Search = _interopRequireDefault(__webpack_require__(6));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // 3rd party packages from NPM
@@ -10348,6 +10350,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var mobileMenu = new _MobileMenu.default();
 var heroSlider = new _HeroSlider.default();
 var googleMap = new _GoogleMap.default();
+var search = new _Search.default();
 
 /***/ }),
 /* 2 */
@@ -13580,6 +13583,162 @@ function () {
 }();
 
 var _default = GMap;
+exports.default = _default;
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _jquery = _interopRequireDefault(__webpack_require__(0));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Search =
+/*#__PURE__*/
+function () {
+  // 1. describe and create/initiate our object
+  function Search() {
+    _classCallCheck(this, Search);
+
+    this.addSearchHTML(); // loads the overlay HTML
+
+    this.resultsDiv = (0, _jquery.default)('#search-overlay__results');
+    this.openButton = (0, _jquery.default)('.js-search-trigger');
+    this.closeButton = (0, _jquery.default)('.search-overlay__close');
+    this.searchOverlay = (0, _jquery.default)('.search-overlay');
+    this.searchField = (0, _jquery.default)('#search-term');
+    this.events();
+    this.isOverlayOpen = false;
+    this.isSpinnerVisible = false;
+    this.previousValue;
+    this.typingTimer;
+  } // 2. events
+
+
+  _createClass(Search, [{
+    key: "events",
+    value: function events() {
+      this.openButton.on('click', this.openOverlay.bind(this)); // on() changes the meaning of "this" to HTML element, so we use bind()
+
+      this.closeButton.on('click', this.closeOverlay.bind(this));
+      (0, _jquery.default)(document).on('keydown', this.keyPressDispatcher.bind(this));
+      this.searchField.on('keyup', this.typingLogic.bind(this)); // here we set keyup because keydown is too fast and does not allow the search field to update it's own value
+    } // 3. methods (function, action)
+
+  }, {
+    key: "typingLogic",
+    value: function typingLogic() {
+      if (this.searchField.val() != this.previousValue) {
+        clearTimeout(this.typingTimer);
+
+        if (this.searchField.val()) {
+          if (!this.isSpinnerVisible) {
+            this.resultsDiv.html('<div class="spinner-loader"></div>');
+            this.isSpinnerVisible = true;
+          }
+
+          this.typingTimer = setTimeout(this.getResults.bind(this), 750);
+        } else {
+          this.resultsDiv.html('');
+          this.isSpinnerVisible = false;
+        }
+      }
+
+      this.previousValue = this.searchField.val();
+    }
+  }, {
+    key: "getResults",
+    value: function getResults() {
+      var _this = this;
+
+      // Asinchronous method (faster)
+      _jquery.default.when(_jquery.default.getJSON(universityData.root_url + '/wp-json/wp/v2/posts?search=' + this.searchField.val()), _jquery.default.getJSON(universityData.root_url + '/wp-json/wp/v2/pages?search=' + this.searchField.val())).then(function (posts, pages) {
+        var combinedResults = posts[0].concat(pages[0]);
+
+        _this.resultsDiv.html("\n            <h2 class=\"search-overlay__section-title\">General Information</h2> \n              ".concat(combinedResults.length ? "<ul class='link-list min-list'>" : "<p>No general information mathces that search.</p>", "  \n                ").concat(combinedResults.map(function (item) {
+          return "<li><a href =\"".concat(item.link, "\">").concat(item.title.rendered, "</a> ").concat(item.type == 'post' ? " by ".concat(item.authorName) : '', "</li>");
+        }).join(''), "\n              ").concat(combinedResults.length ? "</ul>" : "", "\n          "));
+
+        _this.isSpinnerVisible = false;
+      }, function () {
+        _this.resultsDiv.html('<p>Unexpecting eror, please try again.</p>');
+      }); // Sinchronous method of getting requests
+
+      /*$.getJSON(universityData.root_url + '/wp-json/wp/v2/posts?search=' + this.searchField.val(), posts => {
+         $.getJSON(universityData.root_url + '/wp-json/wp/v2/pages?search=' + this.searchField.val(), pages => {
+           var combinedResults = posts.concat(pages);
+           this.resultsDiv.html(`
+           <h2 class="search-overlay__section-title">General Information</h2> 
+             ${combinedResults.length ? "<ul class='link-list min-list'>" : "<p>No general information mathces that search.</p>"}  
+               ${combinedResults.map(item => `<li><a href ="${item.link}">${item.title.rendered}</a></li>`).join('')}
+             ${combinedResults.length ? "</ul>" : ""}
+         `);
+           this.isSpinnerVisible = false;
+         });
+       });
+      */
+
+    }
+  }, {
+    key: "keyPressDispatcher",
+    value: function keyPressDispatcher(e) {
+      //console.log(e.keyCode);
+      if (e.keyCode == 83 && !this.isOverlayOpen && !(0, _jquery.default)('input, textarea').is(':focus')) {
+        this.openOverlay();
+      }
+
+      if (e.keyCode == 27 && this.isOverlayOpen) {
+        this.closeOverlay();
+      }
+    }
+  }, {
+    key: "openOverlay",
+    value: function openOverlay() {
+      var _this2 = this;
+
+      this.searchOverlay.addClass('search-overlay--active');
+      (0, _jquery.default)('body').addClass('body-no-scroll');
+      this.searchField.val(''); // clear the search field before open
+
+      setTimeout(function () {
+        return _this2.searchField.focus();
+      }, 301); // paces the cursor in the search field
+
+      this.isOverlayOpen = true;
+    }
+  }, {
+    key: "closeOverlay",
+    value: function closeOverlay() {
+      this.searchOverlay.removeClass('search-overlay--active');
+      (0, _jquery.default)('body').removeClass('body-no-scroll');
+      this.isOverlayOpen = false;
+    } // load the overlay HTML on page
+
+  }, {
+    key: "addSearchHTML",
+    value: function addSearchHTML() {
+      (0, _jquery.default)('body').append("\n            <div class=\"search-overlay\">\n         <div class=\"search-overlay__top\">\n            <div class=\"container\">\n\t\t\t\t\t\t\t<i class=\"fa fa-search search-overlay__icon\" aria-hidden=\"true\"></i>              \n              <input type=\"text\" class=\"search-term\" placeholder=\"What are you looking for?\" id=\"search-term\">\n\t\t\t\t\t\t\t<i class=\"fa fa-window-close search-overlay__close\" aria-hidden=\"true\"></i> \n            </div>\n         </div>\n         <div class=\"container\">\n           <div id=\"search-overlay__results\"></div>\n         </div>\n      </div>\n    ");
+    }
+  }]);
+
+  return Search;
+}();
+
+var _default = Search;
 exports.default = _default;
 
 /***/ })
