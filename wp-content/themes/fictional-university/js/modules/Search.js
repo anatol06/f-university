@@ -158,6 +158,7 @@ class Search {
     this.searchField.val(''); // clear the search field before open
     setTimeout(() => this.searchField.focus(),301); // paces the cursor in the search field
     this.isOverlayOpen = true;
+    return false; // prevents default behavior 
   }
 
   closeOverlay() {

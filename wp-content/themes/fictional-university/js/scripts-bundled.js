@@ -13745,6 +13745,7 @@ function () {
       }, 301); // paces the cursor in the search field
 
       this.isOverlayOpen = true;
+      return false; // prevents default behavior 
     }
   }, {
     key: "closeOverlay",
