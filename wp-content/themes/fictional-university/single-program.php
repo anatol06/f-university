@@ -11,7 +11,9 @@ get_header();
      <div class="metabox metabox--position-up metabox--with-home-link">
         <p><a class="metabox__blog-home-link" href="<?php echo get_post_type_archive_link('program'); ?>"><i class="fa fa-home" aria-hidden="true"></i> All Programs</a> <span class="metabox__main"><?php the_title(); ?></span></p>
     </div> 
-    <div class="generic-content"><?php the_content(); ?></div>
+    <!-- <div class="generic-content"><?php //the_content(); ?></div> this is the default WP content which was removed with 
+    ACF main_body_content field in order to solve the issue with programs queries. (If the text of one program contains the keyword-name of another program, the search result was containing the both programs in Programs column) -->
+    <div class="generic-content"><?php the_field('main_body_content'); ?></div>
     
     <?php
 
