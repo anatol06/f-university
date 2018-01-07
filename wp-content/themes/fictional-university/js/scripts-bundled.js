@@ -10342,6 +10342,8 @@ var _GoogleMap = _interopRequireDefault(__webpack_require__(5));
 
 var _Search = _interopRequireDefault(__webpack_require__(6));
 
+var _MyNotes = _interopRequireDefault(__webpack_require__(7));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // 3rd party packages from NPM
@@ -10351,6 +10353,7 @@ var mobileMenu = new _MobileMenu.default();
 var heroSlider = new _HeroSlider.default();
 var googleMap = new _GoogleMap.default();
 var search = new _Search.default();
+var mynotes = new _MyNotes.default();
 
 /***/ }),
 /* 2 */
@@ -13766,6 +13769,175 @@ function () {
 }();
 
 var _default = Search;
+exports.default = _default;
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _jquery = _interopRequireDefault(__webpack_require__(0));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var myNotes =
+/*#__PURE__*/
+function () {
+  function myNotes() {
+    _classCallCheck(this, myNotes);
+
+    this.events();
+  } // Events
+
+
+  _createClass(myNotes, [{
+    key: "events",
+    value: function events() {
+      (0, _jquery.default)('#my-notes').on('click', '.delete-note', this.deleteNote);
+      (0, _jquery.default)('#my-notes').on('click', '.edit-note', this.editNote.bind(this));
+      (0, _jquery.default)('#my-notes').on('click', '.update-note', this.updateNote.bind(this));
+      (0, _jquery.default)('.submit-note').on('click', this.createNote.bind(this));
+    } // Methods
+
+  }, {
+    key: "editNote",
+    value: function editNote(e) {
+      var thisNote = (0, _jquery.default)(e.target).parents('li');
+
+      if (thisNote.data('state') == 'editable') {
+        // make read only
+        this.makeNoteReadOnly(thisNote);
+      } else {
+        // make editable
+        this.makeNoteEditable(thisNote);
+      }
+    }
+  }, {
+    key: "makeNoteEditable",
+    value: function makeNoteEditable(thisNote) {
+      thisNote.find('.edit-note').html('<i class="fa fa-times" aria-hidden="true"></i> Cancel');
+      thisNote.find('.note-title-field, .note-body-field').removeAttr('readonly').addClass('note-active-field');
+      thisNote.find('.update-note').addClass('update-note--visible');
+      thisNote.data('state', 'editable');
+    }
+  }, {
+    key: "makeNoteReadOnly",
+    value: function makeNoteReadOnly(thisNote) {
+      thisNote.find('.edit-note').html('<i class="fa fa-pencil" aria-hidden="true"></i> Edit');
+      thisNote.find('.note-title-field, .note-body-field').attr('readonly', 'readonly').removeClass('note-active-field');
+      thisNote.find('.update-note').removeClass('update-note--visible');
+      thisNote.data('state', 'cancel');
+    } // Delete note
+
+  }, {
+    key: "deleteNote",
+    value: function deleteNote(e) {
+      var thisNote = (0, _jquery.default)(e.target).parents('li');
+
+      _jquery.default.ajax({
+        beforeSend: function beforeSend(xhr) {
+          xhr.setRequestHeader('X-WP-Nonce', universityData.nonce);
+        },
+        url: universityData.root_url + '/wp-json/wp/v2/note/' + thisNote.data('id'),
+        type: 'DELETE',
+        success: function success(response) {
+          thisNote.slideUp();
+          console.log('Deleted Successfully');
+          console.log(response);
+
+          if (response.userNoteCount < 5) {
+            (0, _jquery.default)('.note-limit-message').removeClass('active');
+          }
+        },
+        error: function error(response) {
+          console.log('Sorry, could not delete');
+          console.log(response);
+        }
+      });
+    } // Save the updated note
+
+  }, {
+    key: "updateNote",
+    value: function updateNote(e) {
+      var _this = this;
+
+      var thisNote = (0, _jquery.default)(e.target).parents('li');
+      var ourUpdatedPost = {
+        'title': thisNote.find('.note-title-field').val(),
+        'content': thisNote.find('.note-body-field').val()
+      };
+
+      _jquery.default.ajax({
+        beforeSend: function beforeSend(xhr) {
+          xhr.setRequestHeader('X-WP-Nonce', universityData.nonce);
+        },
+        url: universityData.root_url + '/wp-json/wp/v2/note/' + thisNote.data('id'),
+        type: 'POST',
+        data: ourUpdatedPost,
+        success: function success(response) {
+          _this.makeNoteReadOnly(thisNote);
+
+          console.log('Saved Successfully');
+          console.log(response);
+        },
+        error: function error(response) {
+          console.log('Sorry, the new data are not saved');
+          console.log(response);
+        }
+      });
+    } // Create new note
+
+  }, {
+    key: "createNote",
+    value: function createNote(e) {
+      var ourNewPost = {
+        'title': (0, _jquery.default)('.new-note-title').val(),
+        'content': (0, _jquery.default)('.new-note-body').val(),
+        'status': 'publish'
+      };
+
+      _jquery.default.ajax({
+        beforeSend: function beforeSend(xhr) {
+          xhr.setRequestHeader('X-WP-Nonce', universityData.nonce);
+        },
+        url: universityData.root_url + '/wp-json/wp/v2/note/',
+        type: 'POST',
+        data: ourNewPost,
+        success: function success(response) {
+          (0, _jquery.default)('.new-note-title, .new-note-body').val('');
+          (0, _jquery.default)("\n          <li data-id=\"".concat(response.id, "\">\n            <input readonly class=\"note-title-field\" value=\"").concat(response.title.raw, "\">\n            <span class=\"edit-note\"><i class=\"fa fa-pencil\" aria-hidden=\"true\"></i> Edit</span>\n            <span class=\"delete-note\"><i class=\"fa fa-trash-o\" aria-hidden=\"true\"></i> Delete</span>\n            <textarea readonly class=\"note-body-field\">").concat(response.content.raw, "</textarea><br>\n            <span class=\"update-note btn btn--blue btn--small\"><i class=\"fa fa-arrow-right\" aria-hidden=\"true\"></i> Save</span>\n          </li>\n        ")).prependTo('#my-notes').hide().slideDown();
+          console.log('New Post Saved Successfully');
+          console.log(response);
+        },
+        error: function error(response) {
+          console.log('Sorry, the new post was not saved');
+          console.log(response);
+
+          if (response.responseText = "You have reached your note limit.") {
+            (0, _jquery.default)(".note-limit-message").addClass("active");
+          }
+        }
+      });
+    }
+  }]);
+
+  return myNotes;
+}();
+
+var _default = myNotes;
 exports.default = _default;
 
 /***/ })

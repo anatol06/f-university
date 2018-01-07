@@ -7,6 +7,10 @@
       'get_callback' => function() { return get_the_author(); }
     ));
 
+    register_rest_field('note', 'userNoteCount', array(
+      'get_callback' => function() { return count_user_posts(get_current_user_id(), 'note'); }
+    ));
+
     // here can add more rest API customization in order to get any data
   }
 
@@ -51,7 +55,8 @@
     wp_enqueue_style('university_main_styles', get_stylesheet_uri(), NULL, microtime());  // switchen off ceshing [ NULL, microtime())]
 
     wp_localize_script('main-university-js', 'universityData', array(
-      'root_url' => get_site_url()      
+      'root_url' => get_site_url(),
+      'nonce' => wp_create_nonce('wp_rest')   
     ));
   }
 
@@ -106,3 +111,68 @@
   }
 
   add_filter('acf/fields/google_map/api', 'universityMapKey');
+
+  // Redirect subscriber accounts aut of admin onto homepage
+  add_action('admin_init', 'redirectSubsToFrontend');
+
+  function redirectSubsToFrontend() {
+    $ourCurrentUser = wp_get_current_user();
+
+    if ( count($ourCurrentUser->roles) == 1 AND $ourCurrentUser->roles[0] == 'subscriber' ) {
+      wp_redirect(site_url('/'));
+      exit;
+    }
+  }
+
+  // Eliminate admin bar
+  add_action('wp_loaded', 'noSubsAdminBar');
+
+  function noSubsAdminBar() {
+    $ourCurrentUser = wp_get_current_user();
+
+    if ( count($ourCurrentUser->roles) == 1 AND $ourCurrentUser->roles[0] == 'subscriber' ) {
+      show_admin_bar(false);
+    }
+  }
+
+  //Customize Login Screen
+  add_filter('login_headerurl', 'ourHeaderUrl');
+
+  function ourHeaderUrl() {
+    return esc_url(site_url('/'));
+  }
+
+  add_action('login_enqueue_scripts', 'ourLoginCss');
+
+  function ourLoginCss() {
+    wp_enqueue_style('roboto-condensed-font', '//fonts.googleapis.com/css?family=Roboto+Condensed:300,300i,400,400i,700,700i|Roboto:100,300,400,400i,700,700i');
+    wp_enqueue_style('university_main_styles', get_stylesheet_uri());
+  }
+
+  add_filter('login_headertitle', 'ourLoginTitle');
+
+  function ourLoginTitle() {
+    return get_bloginfo('name');
+  }
+
+  // Force note posts to be private
+  add_filter('wp_insert_post_data', 'makeNotePrivate', 10, 2);
+
+  function makeNotePrivate($data, $postarr) {
+    if ($data['post_type'] == 'note') {
+      if (count_user_posts(get_current_user_id(), 'note') > 4 AND !$postarr['ID']) {
+        die('You have reached your note limit.');
+      }
+
+      $data['post_content'] = sanitize_textarea_field($data['post_content']);
+      $data['post_title'] = sanitize_text_field($data['post_title']);
+    }
+
+    if($data['post_type'] == 'note' AND $data['post_status'] != 'trash') {
+      $data['post_status'] = 'private';
+    }    
+    return $data;
+  }
+
+
+  
