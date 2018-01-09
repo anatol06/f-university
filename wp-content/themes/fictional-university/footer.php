@@ -16,9 +16,9 @@
                 <nav class="nav-list">
                   <ul>
                     <li><a href="<?php echo site_url('/about-us') ?>">About Us</a></li>
-                    <li><a href="#">Programs</a></li>
-                    <li><a href="#">Events</a></li>
-                    <li><a href="#">Campuses</a></li>
+                    <li><a href="<?php echo get_post_type_archive_link('program'); ?>">Programs</a></li>
+                    <li><a href="<?php echo get_post_type_archive_link('event'); ?>">Events</a></li>
+                    <li><a href="<?php echo get_post_type_archive_link('campus'); ?>">Campuses</a></li>
                   </ul>                  
              <!--    <?php 
                   //wp_nav_menu(array(
@@ -60,9 +60,8 @@
               </nav>
             </div>
           </div>
-
         </div>
-      </footer>          
-    <?php wp_footer(); ?>
+      </footer>
+      <?php wp_footer(); ?>    
   </body>
 </html>

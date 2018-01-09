@@ -16,9 +16,14 @@
   }
 }
 
+html {
+  line-height: 1.5;  
+}
+
 body {
-  color: #333;
+  color: #666;
   font-family: 'Roboto', sans-serif;
+  font-weight: 500;
   overflow-x: hidden;
   position: relative;
 }
